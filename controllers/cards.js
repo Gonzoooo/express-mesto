@@ -37,11 +37,16 @@ module.exports.deleteCard = (req, res) => {
   const id = req.params.cardId;
 
   Card.findByIdAndRemove(id)
-    .then((card) => res.status(200)
-      .send(card))
+    .then((card) => {
+      if (!card) {
+        res.status(Errors.ERR_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        return;
+      }
+      res.status(200).send(card);
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(Errors.ERR_NOT_FOUND).send({ message: `Карточка с указанным _id не найдена. ${err}` });
+        res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные для удаления карточки. ${err}` });
         return;
       }
       res.status(Errors.ERR_DEFAULT).send({ message: `Ошибка по умолчанию. ${err}` });
@@ -53,14 +58,16 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { $addToSet: { likes: req.user._id } },
   { new: true, runValidators: true },
 )
-  .then((card) => res.status(200)
-    .send(card))
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(Errors.ERR_NOT_FOUND).send({ message: `Передан несуществующий _id карточки. ${err}` });
+  .then((card) => {
+    if (!card) {
+      res.status(Errors.ERR_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
       return;
     }
-    if (err.name === 'ValidationError') {
+    res.status(200)
+      .send(card);
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
       res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные для постановки лайка. ${err}` });
       return;
     }
@@ -72,15 +79,17 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { $pull: { likes: req.user._id } },
   { new: true, runValidators: true },
 )
-  .then((card) => res.status(200)
-    .send(card))
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(Errors.ERR_NOT_FOUND).send({ message: `Передан несуществующий _id карточки. ${err}` });
+  .then((card) => {
+    if (!card) {
+      res.status(Errors.ERR_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
       return;
     }
-    if (err.name === 'ValidationError') {
-      res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные для снятии лайка. ${err}` });
+    res.status(200)
+      .send(card);
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные для снятия лайка. ${err}` });
       return;
     }
     res.status(Errors.ERR_DEFAULT).send({ message: `Ошибка по умолчанию. ${err}` });

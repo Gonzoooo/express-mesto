@@ -23,6 +23,10 @@ module.exports.getUser = (req, res) => {
         .send(user);
     })
     .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные пользователя. ${err}` });
+        return;
+      }
       res.status(Errors.ERR_DEFAULT).send({ message: `Ошибка по умолчанию. ${err}` });
     });
 };
@@ -65,13 +69,15 @@ module.exports.updateUserProfile = (req, res) => {
     },
     { new: true, runValidators: true },
   )
-    .then((user) => res.status(200)
-      .send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(Errors.ERR_NOT_FOUND).send({ message: `Пользователь с указанным _id не найден. ${err}` });
+    .then((user) => {
+      if (!user) {
+        res.status(Errors.ERR_NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден.' });
         return;
       }
+      res.status(200)
+        .send(user);
+    })
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные при обновлении профиля. ${err}` });
         return;
@@ -89,13 +95,15 @@ module.exports.updateUserAvatar = (req, res) => {
     { avatar },
     { new: true, runValidators: true },
   )
-    .then((user) => res.status(200)
-      .send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(Errors.ERR_NOT_FOUND).send({ message: `Пользователь с указанным _id не найден. ${err}` });
+    .then((user) => {
+      if (!user) {
+        res.status(Errors.ERR_NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден.' });
         return;
       }
+      res.status(200)
+        .send(user);
+    })
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные при обновлении аватара. ${err}` });
         return;
