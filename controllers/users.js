@@ -22,7 +22,7 @@ module.exports.createUser = (req, res) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        res.status(403).send({ message: 'Такой пользователь уже существует' });
+        res.status(Errors.CONFLICT).send({ message: 'Такой пользователь уже существует.' });
       }
       return bcrypt.hash(password, 10);
     })
@@ -37,10 +37,10 @@ module.exports.createUser = (req, res) => {
       .send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя. ${err}` });
+        res.status(Errors.ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
         return;
       }
-      res.status(Errors.ERR_DEFAULT).send({ message: `Ошибка по умолчанию. ${err}` });
+      res.status(Errors.ERR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
@@ -50,7 +50,7 @@ module.exports.login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
-        res.status(403).send({ message: 'Такого пользователя не существует' });
+        res.status(Errors.CONFLICT).send({ message: 'Такого пользователя не существует' });
       }
       const token = jwt.sign(
         { _id: user._id },
@@ -66,7 +66,7 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       res
-        .status(401)
+        .status(Errors.UNAUTHORIZED)
         .send({ message: err.message });
     });
 };
@@ -85,10 +85,10 @@ module.exports.getUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные пользователя. ${err}` });
+        res.status(Errors.ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные пользователя.' });
         return;
       }
-      res.status(Errors.ERR_DEFAULT).send({ message: `Ошибка по умолчанию. ${err}` });
+      res.status(Errors.ERR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
@@ -152,9 +152,9 @@ module.exports.updateUserAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(Errors.ERR_BAD_REQUEST).send({ message: `Переданы некорректные данные при обновлении аватара. ${err}` });
+        res.status(Errors.ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
         return;
       }
-      res.status(Errors.ERR_DEFAULT).send({ message: `Ошибка по умолчанию. ${err}` });
+      res.status(Errors.ERR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
     });
 };

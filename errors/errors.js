@@ -1,9 +1,15 @@
 const ERR_BAD_REQUEST = 400;
+const UNAUTHORIZED = 401;
+const FORBIDDEN = 403;
 const ERR_NOT_FOUND = 404;
+const CONFLICT = 409;
 const ERR_DEFAULT = 500;
 
 module.exports = {
   ERR_BAD_REQUEST,
+  UNAUTHORIZED,
+  FORBIDDEN,
   ERR_NOT_FOUND,
+  CONFLICT,
   ERR_DEFAULT,
 };
