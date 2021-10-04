@@ -44,17 +44,21 @@ module.exports.deleteCard = (req, res) => {
       }
       if (JSON.stringify(card.owner) !== JSON.stringify(req.user._id)) {
         res.status(Errors.FORBIDDEN).send({ message: 'Нет прав' });
-      }
-      Card.findByIdAndRemove(id);
-    })
-    .then(() => {
-      res.status(200).send({ message: 'Карточка с удалена.' });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(Errors.ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки.' });
         return;
       }
+      Card.findByIdAndRemove(id)
+        .then(() => {
+          res.status(200).send({ message: 'Карточка удалена.' });
+        })
+        .catch((err) => {
+          if (err.name === 'CastError') {
+            res.status(Errors.ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки.' });
+            return;
+          }
+          res.status(Errors.ERR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
+        });
+    })
+    .catch(() => {
       res.status(Errors.ERR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
     });
 };

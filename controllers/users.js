@@ -72,6 +72,27 @@ module.exports.login = (req, res) => {
 };
 
 module.exports.getUser = (req, res) => {
+  const id = req.params._id;
+
+  User.findById(id)
+    .then((user) => {
+      if (!user) {
+        res.status(Errors.ERR_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден. ' });
+        return;
+      }
+      res.status(200)
+        .send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(Errors.ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные пользователя.' });
+        return;
+      }
+      res.status(Errors.ERR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
+    });
+};
+
+module.exports.getCurrentUser = (req, res) => {
   const id = req.user._id;
 
   User.findById(id)
