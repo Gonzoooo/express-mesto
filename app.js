@@ -12,6 +12,7 @@ const {
   login,
   createUser,
 } = require('./controllers/users');
+const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -45,22 +46,26 @@ app.post('/signup', celebrate({
 
 app.use(auth);
 
-app.use(errors());
-
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
-app.all('*', require('./routes/notFound'));
 
-app.use((err, req, res) => {
+app.use('*', () => {
+  throw new NotFoundError('Кажется что-то полшло не так! Запрашиваемая страница не найдена');
+});
+
+app.use(errors());
+
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   res
     .status(statusCode)
     .send({
       message: statusCode === 500
-        ? `На сервере произошла ошибка ${err}`
+        ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {
